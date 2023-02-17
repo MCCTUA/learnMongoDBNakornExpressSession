@@ -1,0 +1,20 @@
+extends layouts/form
+
+block content
+  h1.h4 เข้าสู่ระบบ
+  form(action="/login" method="POST")
+    .mb-3
+      label.form-label(for="inputEmail") Email:
+      input.form-control(id="inputEmail" type="email" name="email" required)
+    .mb-3
+      label.form-label(for="inputPassword") Email:
+      input.form-control(id="inputPassword" type="password" name="password" required)
+    ul
+      li
+        a(herf='#') สมัครสมาชิก
+      li
+        a(herf='#') ขอรับรหัสผ่าน
+    button.btn.btn-secondary เข้าสู่ระบบ
+    hr
+    a.btn.btn-primary(href='#') เข้าสู่ระบบผ่าน Facebook
+    a.btn.btn-warning(href='#') เข้าสู่ระบบผ่าน Google
