@@ -10,6 +10,7 @@ module.exports = async (req, res) => {
     return res.redirect('/login')
   }
   // ถ้าพบ user ให้เก็บลงใน Session ตามด้านล่างต่อไป
+  req.flash('success', 'เข้าสู่ระบบสำเร็จ')
   req.session.user = user
   return res.redirect('/')
 }

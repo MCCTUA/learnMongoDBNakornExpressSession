@@ -40,6 +40,13 @@ app.use(
   })
 )
 app.use(connectFlash())
+app.use((req, res, next) => {
+  res.locals.alertMessage = {
+    error: req.flash('error'),
+    success: req.flash('success')
+  }
+  next()
+})
 app.use(require('./routers/routers'))
 
 const { PORT } = process.env

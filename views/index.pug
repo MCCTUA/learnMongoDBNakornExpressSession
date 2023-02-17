@@ -1,5 +1,6 @@
 extends layouts/main
 
 block content
+  include components/alert
   h1 คุณกำลังเข้าสู่ระบบในนาม #{user.email}
   a.btn.btn-danger(href="/logout") ออกจากระบบ
