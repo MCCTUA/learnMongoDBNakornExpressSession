@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const session = require('express-session')
 const redis = require('redis')
 const connectRedis = require('connect-redis')
+const connectFlash = require('connect-flash')
 const ms = require('ms')
 const path = require('path')
 
@@ -38,7 +39,7 @@ app.use(
     secret: process.env.SECRET_KEY
   })
 )
-
+app.use(connectFlash())
 app.use(require('./routers/routers'))
 
 const { PORT } = process.env

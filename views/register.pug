@@ -2,7 +2,7 @@ extends layouts/form
 
 block content
   h1.h4 สมัครสมาชิก
-  //- include components/alert
+  include components/alert
   form(action="/register" method="POST")
     .mb-3
       label.form-label(for="inputEmail") อีเมล:

@@ -6,6 +6,7 @@ module.exports = async (req, res) => {
     password: req.body.password
   })
   if (!user) {
+    req.flash('error', 'Email หรือ Password ไม่ถูกต้อง')
     return res.redirect('/login')
   }
   // ถ้าพบ user ให้เก็บลงใน Session ตามด้านล่างต่อไป

@@ -2,7 +2,7 @@ extends layouts/form
 
 block content
   h1.h4 เข้าสู่ระบบ
-  //- include components/alert
+  include components/alert
   form(action="/login" method="POST")
     .mb-3
       label.form-label(for="inputEmail") อีเมล:
