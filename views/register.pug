@@ -1,0 +1,19 @@
+extends layouts/form
+
+block content
+  h1.h4 สมัครสมาชิก
+  //- include components/alert
+  form(action="/register" method="POST")
+    .mb-3
+      label.form-label(for="inputEmail") อีเมล:
+      input.form-control(id="inputEmail" type="email" name="email" required)
+    .mb-3
+      label.form-label(for="inputPassword") รหัสผ่าน:
+      input.form-control(id="inputPassword" type="password" name="password" required)
+    .mb-3
+      label.form-label(for="inputPassword2") รหัสผ่านยืนยัน:
+      input.form-control(id="inputPassword2" type="password" name="passwordConfirm" required)
+    ul
+      li
+        a(href="/login") เข้าสู่ระบบ
+    button.btn.btn-primary สมัครสมาชิก

@@ -2,19 +2,20 @@ extends layouts/form
 
 block content
   h1.h4 เข้าสู่ระบบ
+  //- include components/alert
   form(action="/login" method="POST")
     .mb-3
-      label.form-label(for="inputEmail") Email:
+      label.form-label(for="inputEmail") อีเมล:
       input.form-control(id="inputEmail" type="email" name="email" required)
     .mb-3
-      label.form-label(for="inputPassword") Email:
+      label.form-label(for="inputPassword") รหัสผ่าน:
       input.form-control(id="inputPassword" type="password" name="password" required)
     ul
       li
-        a(herf='#') สมัครสมาชิก
-      li
-        a(herf='#') ขอรับรหัสผ่าน
+        a(href="/register") สมัครสมาชิก
+      //- li
+      //-   a(href="/forget") ขอรับรหัสผ่าน
     button.btn.btn-secondary เข้าสู่ระบบ
-    hr
-    a.btn.btn-primary(href='#') เข้าสู่ระบบผ่าน Facebook
-    a.btn.btn-warning(href='#') เข้าสู่ระบบผ่าน Google
+    //- hr
+    //- a.btn.btn-primary(href="/login/facebook") เข้าสู่ระบบผ่าน Facebook
+    //- a.btn.btn-warning(href="/login/google") เข้าสู่ระบบผ่าน Google
