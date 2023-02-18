@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node express.js",
-    "dev": "nodemon express.js"
+    "start": "node bootstrap/express.js",
+    "dev": "nodemon bootstrap/express.js"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +19,8 @@
     "express-session": "^1.17.3",
     "mongoose": "^6.9.2",
     "ms": "^2.1.3",
+    "passport": "^0.6.0",
+    "passport-local": "^1.0.0",
     "pug": "^3.0.2",
     "redis": "^4.6.4"
   },

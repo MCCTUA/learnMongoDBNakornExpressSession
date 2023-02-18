@@ -53,7 +53,7 @@ app.use((req, res, next) => {
   }
   next()
 })
-app.use(require('./routers/routers'))
+app.use(require('../routers/routers'))
 
 const { PORT } = process.env
 app.listen(PORT, console.log(`App started at http://localhost:${PORT}`))
