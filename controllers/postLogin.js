@@ -1,25 +1,30 @@
-const bcrypt = require('bcrypt')
-const Users = require('../models/Users')
+const passport = require('passport')
 
-module.exports = async (req, res) => {
-  const redirectWithError = () => {
-    req.flash('error', 'Email หรือ Password ไม่ถูกต้อง')
-    return res.redirect('/login')
-  }
-  const user = await Users.findOne({
-    email: req.body.email
-  })
-  if (!user) {
-    return redirectWithError()
-  }
-  // Compare password ที่ส่งเข้ามากับใน Database ผ่าน bcrypt ว่าถูกต้องหรือไม่
-  const result = await bcrypt.compare(req.body.password, user.password)
-  if (!result) {
-    return redirectWithError()
-  }
-
-  // ถ้าพบ user ให้เก็บลงใน Session ตามด้านล่างต่อไป
-  req.flash('success', 'เข้าสู่ระบบสำเร็จ')
-  req.session.user = user
-  return res.redirect('/')
+module.exports = (req, res, next) => {
+  // Custom handler จากการใช้ passport
+  // (err, user, info) ได้มาจาก ./boostrap/passport.js ในจังหวะที่เราส่ง next(null, user, message) ออกมา
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      // next(err) ตัวนี้เป็น middleware ของ express ไม่ใช้ของ passport
+      return next(err)
+    }
+    if (!user) {
+      req.flash('error', info)
+      return res.redirect('/login')
+    }
+    req.login(user, (err) => {
+      if (err) {
+        return next(err)
+      }
+      req.flash('success', 'คุณได้เข้าสู่ระบบเสร็จสิ้น')
+      return res.redirect('/')
+    })
+  })(req, res, next) // <--- วงเล็บปิดเรียก (req, res, next)
 }
+
+/*
+{
+    successRedirect: '/',
+    failureRedirect: '/login'
+  }
+*/

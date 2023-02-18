@@ -5,12 +5,13 @@
 // 1.
 const dotenv = require('dotenv')
 const express = require('express')
-const mongoose = require('mongoose')
 const session = require('express-session')
 const redis = require('redis')
 const connectRedis = require('connect-redis')
 const connectFlash = require('connect-flash')
+const passport = require('passport')
 const ms = require('ms')
+const mongoose = require('mongoose')
 const path = require('path')
 // 2.
 dotenv.config()
@@ -25,6 +26,8 @@ const redisClient = redis.createClient({
   url: process.env.REDIS_URL
 })
 redisClient.connect()
+
+require('./passport')
 
 const app = express()
 
@@ -45,6 +48,9 @@ app.use(
   })
 )
 app.use(connectFlash())
+app.use(passport.initialize()) // ทำให้เราได้ method ของ passport มาใช้เช่น req.user, req.login(), req.logout() เป็นต้น
+app.use(passport.session())
+
 app.use((req, res, next) => {
   // set global variable ใน express โดยใช้ res.locals
   res.locals.alertMessage = {
@@ -53,7 +59,8 @@ app.use((req, res, next) => {
   }
   next()
 })
-app.use(require('../routers/routers'))
+
+app.use(require('../routers/routers')) // จะรู้จักข้อมูลจากการทำ deserialize ของ passport เนื่องจากมีการประกาศใช้งาน passport.initialize และ passport.session ไว้แล้วด้านบน ทำให้รู้จัก req.user จากไฟล์ ./bootstrap/passports.js
 
 const { PORT } = process.env
 app.listen(PORT, console.log(`App started at http://localhost:${PORT}`))
