@@ -1,3 +1,8 @@
+/*
+ * 1. นำเข้า Module ต่างๆ ที่ใช้งานใน application
+ * 2. กำหนดใช้งาน dotenv
+ */
+// 1.
 const dotenv = require('dotenv')
 const express = require('express')
 const mongoose = require('mongoose')
@@ -7,9 +12,9 @@ const connectRedis = require('connect-redis')
 const connectFlash = require('connect-flash')
 const ms = require('ms')
 const path = require('path')
-
+// 2.
 dotenv.config()
-
+// 3.
 mongoose.set('strictQuery', false)
 mongoose.connect(process.env.MONGODB_URL, () => {
   console.log('Connected to MongoDB')
@@ -41,6 +46,7 @@ app.use(
 )
 app.use(connectFlash())
 app.use((req, res, next) => {
+  // set global variable ใน express โดยใช้ res.locals
   res.locals.alertMessage = {
     error: req.flash('error'),
     success: req.flash('success')
