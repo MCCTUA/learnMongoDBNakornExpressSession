@@ -7,9 +7,11 @@ const schema = new Schema(
       required: true,
       unique: true
     },
-    password: {
-      type: String,
-      require: true
+    password: String,
+    avatarUrl: String,
+    oauth: {
+      facebook: String,
+      google: String
     }
   },
   { timestamps: true }

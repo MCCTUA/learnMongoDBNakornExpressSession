@@ -1,9 +1,9 @@
 const passport = require('passport')
 
-module.exports = (req, res, next) => {
+module.exports = (strategyName) => (req, res, next) => {
   // Custom handler จากการใช้ passport
   // (err, user, info) ได้มาจาก ./boostrap/passport.js ในจังหวะที่เราส่ง next(null, user, message) ออกมา
-  passport.authenticate('local', (err, user, info) => {
+  passport.authenticate(strategyName, (err, user, info) => {
     if (err) {
       // next(err) ตัวนี้เป็น middleware ของ express ไม่ใช้ของ passport
       return next(err)
@@ -24,6 +24,7 @@ module.exports = (req, res, next) => {
 
 /*
 {
+    เราทำ Handle redirect ด้านบนแทน default ด้านล่างนี้
     successRedirect: '/',
     failureRedirect: '/login'
   }

@@ -1,7 +1,10 @@
 const passport = require('passport')
 const bcrypt = require('bcrypt')
 const Users = require('../models/Users')
+const uploadFileFromUrl = require('../utils/uploadFileFromUrl')
+
 const LocalStrategy = require('passport-local').Strategy
+const FacebookStrategy = require('passport-facebook').Strategy
 
 passport.use(
   new LocalStrategy(
@@ -43,9 +46,52 @@ passport.use(
   )
 )
 
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: process.env.FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+      callbackURL: process.env.FACEBOOK_CALLBACK_URL,
+      profileFields: ['displayName', 'email', 'picture.type(large)']
+    },
+    async (accessToken, refreshToken, profile, next) => {
+      console.log(profile._json)
+      console.log('profile id ', profile._json.id, profile.id)
+      const avatarUrlFromFacebook = profile?._json?.picture?.data?.url
+      let avatarUrl
+      if (avatarUrlFromFacebook) {
+        avatarUrl = await uploadFileFromUrl(
+          `fb_${profile._json.id}.jpg`,
+          avatarUrlFromFacebook
+        )
+        // console.log(avatarUrl)
+      }
+      if (!profile?._json.email) {
+        return next(
+          null,
+          false,
+          'กรุณายินยอมให้เรารับข้อมูล Email ของคุณผ่านทาง Facebook'
+        )
+      }
+      // console.log(profile._json.email)
+      const user = await Users.create({
+        email: profile._json.email,
+        avatarUrl,
+        oauth: {
+          // เราควรยืนยันผ่าน id เสมอ
+          facebook: profile._json.id
+        }
+      })
+      // next(null, false, 'ทดสอบ')
+      next(null, user)
+    }
+  )
+)
+
 // serialize (เอาข้อมูลไป save to session): เมื่อได้ข้อมูลมาแล้ว ต้องทำ serialize ต่อ ซึ่งก็คือการจำแนกข้อมูลว่าเราจะเอาข้อมูลอะไรบ้าง
 passport.serializeUser((user, next) => {
   try {
+    // ในบรรทัดนี้ บันทึกข้อมูลใน redisเพิ่ม เพื่อให้ deserailize ได้เร็วไม่ต้องไปต่อฐานข้อมูลบ่อยๆ แต่ข้อเสียคือหากฐานข้อมูลเปลี่ยน ข้อมูลที่ user ได้ไปจะไม่ถูก update
     next(null, user._id) // save to session
   } catch (error) {
     next(error)
@@ -53,10 +99,11 @@ passport.serializeUser((user, next) => {
 })
 
 // deserialize (เอาข้อมูลจาก session (ต้อง save ลง session ก่อนทุกครั้ง) ไปค้นใน database ): เมื่อเราได้ทำการ serialize ข้อมูลแล้ว (ในที่นี้คือ id) เราจะต้องเอาข้อมูลจากการทำ serialize นี้ไปถอดข้อมูลออกมาเพื่อ response กลับไปหา user
-// ผลของการ deserialize เวลาที่ database มีการเปลี่่ยนแปลงค่า user จะได้ค่าใหม่ไป update ด้วย
+// ผลของการ deserialize เวลาที่ database มีการเปลี่่ยนแปลง จะทำให้ค่าใน session ถูกเปลี่ยนแปลงไปด้วยอัตโนมัติ ทำให้ user ได้ค่าใหม่ที่ถูกก update ไปด้วย (ข้อดี) ส่วนข้อเสีย คือถ้า user เข้า web หลายๆ รอบจะทำให้มีการเรียก load ข้อมูลจาก database ใหม่หลายรอบ ซึ่งเราอาจแก้ไขด้วยการทำ caching หรือไม่ก็เก็บข้อมูลไว้ใน redis แทนได้ กรณีของ redis ให้ไปทำในจังหวะที่ทำ serialize (.bootstrap/passport.js) เราจะให้ไปเก็บข้อมูลใน redis แทน และในส่วนของ deserialze เราก็ไป get ข้อมูลจาก redis แทน mongoDB แทน
 
 passport.deserializeUser(async (id, next) => {
   try {
+    // ในบรรทัดนี้ สามารถให้อ่านข้อมูลจาก redisเพื่อให้เร็วขึ้นแทนได้
     const user = await Users.findById(id)
     return next(null, user) // next(null, object) จะส่ง object ออกไปให้ express และ express จะรับเป็น req.object ซึ่งในทีนี้คือ req.user นั่นเอง
   } catch (error) {
