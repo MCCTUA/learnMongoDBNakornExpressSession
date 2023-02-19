@@ -5,6 +5,7 @@ const uploadFileFromUrl = require('../utils/uploadFileFromUrl')
 
 const LocalStrategy = require('passport-local').Strategy
 const FacebookStrategy = require('passport-facebook').Strategy
+const GoogleStrategy = require('passport-google-oauth20').Strategy
 
 passport.use(
   new LocalStrategy(
@@ -46,6 +47,62 @@ passport.use(
   )
 )
 
+const callbackOAuth =
+  (serviceName) => async (accessToken, refreshToken, profile, next) => {
+    try {
+      const id = profile?.id
+      const email = profile?.emails?.[0]?.value
+      const avatarUrlFromOAuth = profile?.photo?.[0]?.value
+
+      let avatarUrl
+      if (!id) {
+        return next(null, false, `พบปัญหาในการเข้าสู่ระบบผ่าน ${serviceName}`)
+      }
+      if (!email) {
+        return next(
+          null,
+          false,
+          `กรุณายินยอมให้เรารับข้อมูล Email ของคุณผ่านทาง ${serviceName}`
+        )
+      }
+
+      const existsUser = await Users.findOne({
+        [`oauth.${serviceName}`]: id
+      })
+      if (existsUser) {
+        return next(null, existsUser)
+      }
+      if (avatarUrlFromOAuth) {
+        avatarUrl = await uploadFileFromUrl(
+          `${serviceName}_${profile._json.id}.jpg`,
+          avatarUrlFromOAuth
+        )
+        // console.log(avatarUrl)
+      }
+      // console.log(profile._json.email)
+      const exitsEmail = await Users.findOne({ email })
+      if (exitsEmail) {
+        return next(
+          null,
+          false,
+          `ไม่สามารถสร้างบัญชีใหม่ได้ เพราะพบที่อยู่อีเมลซ้ำกับในระบบ กรุณาเลือกวิธีการเข้าสู่ระบบที่คุณเคยเข้าด้วย ${email}`
+        )
+      }
+      const user = await Users.create({
+        email,
+        avatarUrl,
+        oauth: {
+          // เราควรยืนยันผ่าน id เสมอ
+          [serviceName]: id
+        }
+      })
+      // next(null, false, 'ทดสอบ')
+      next(null, user)
+    } catch (error) {
+      return next(error)
+    }
+  }
+
 passport.use(
   new FacebookStrategy(
     {
@@ -54,52 +111,20 @@ passport.use(
       callbackURL: process.env.FACEBOOK_CALLBACK_URL,
       profileFields: ['displayName', 'email', 'picture.type(large)']
     },
-    async (accessToken, refreshToken, profile, next) => {
-      try {
-        const avatarUrlFromFacebook = profile?._json?.picture?.data?.url
-        const id = profile?._json?.id
-        let avatarUrl
-        // console.log(profile._json)
-        // console.log('profile id ', profile._json.id, profile.id)
-        if (!id) {
-          return next(null, false, 'พบปัญหาในการเข้าสู่ระบบผ่าน Facebook')
-        }
+    callbackOAuth('facebook')
+  )
+)
 
-        const existsUser = await Users.findOne({
-          'oauth.facebook': profile?._json?.id
-        })
-        if (existsUser) {
-          return next(null, existsUser)
-        }
-        if (avatarUrlFromFacebook) {
-          avatarUrl = await uploadFileFromUrl(
-            `fb_${profile._json.id}.jpg`,
-            avatarUrlFromFacebook
-          )
-          // console.log(avatarUrl)
-        }
-        if (!profile?._json.email) {
-          return next(
-            null,
-            false,
-            'กรุณายินยอมให้เรารับข้อมูล Email ของคุณผ่านทาง Facebook'
-          )
-        }
-        // console.log(profile._json.email)
-        const user = await Users.create({
-          email: profile._json.email,
-          avatarUrl,
-          oauth: {
-            // เราควรยืนยันผ่าน id เสมอ
-            facebook: profile._json.id
-          }
-        })
-        // next(null, false, 'ทดสอบ')
-        next(null, user)
-      } catch (error) {
-        return next(error)
-      }
-    }
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      scope: ['profile', 'email'],
+      state: true
+    },
+    callbackOAuth('google')
   )
 )
 

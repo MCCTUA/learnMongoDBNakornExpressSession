@@ -13,7 +13,10 @@ router.get(
   '/login/facebook',
   passport.authenticate('facebook', { scope: [scopeFacebook] })
 )
+router.get('/login/google', passport.authenticate('google'))
 router.get('/login/facebook/callback', postLogin('facebook'))
+router.get('/login/google/callback', postLogin('google'))
+
 router.get('/register', require('../controllers/getRegister'))
 router.post('/register', require('../controllers/postRegister'))
 router.get('/logout', require('../controllers/logout'))
