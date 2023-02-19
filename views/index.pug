@@ -3,4 +3,7 @@ extends layouts/main
 block content
   include components/alert
   h1 คุณกำลังเข้าสู่ระบบในนาม #{user.email}
+  .card.mb-3
+    .card-body
+      img(src=user.avatarUrl)
   a.btn.btn-danger(href="/logout") ออกจากระบบ

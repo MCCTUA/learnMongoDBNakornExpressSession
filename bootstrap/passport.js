@@ -55,35 +55,50 @@ passport.use(
       profileFields: ['displayName', 'email', 'picture.type(large)']
     },
     async (accessToken, refreshToken, profile, next) => {
-      console.log(profile._json)
-      console.log('profile id ', profile._json.id, profile.id)
-      const avatarUrlFromFacebook = profile?._json?.picture?.data?.url
-      let avatarUrl
-      if (avatarUrlFromFacebook) {
-        avatarUrl = await uploadFileFromUrl(
-          `fb_${profile._json.id}.jpg`,
-          avatarUrlFromFacebook
-        )
-        // console.log(avatarUrl)
-      }
-      if (!profile?._json.email) {
-        return next(
-          null,
-          false,
-          'กรุณายินยอมให้เรารับข้อมูล Email ของคุณผ่านทาง Facebook'
-        )
-      }
-      // console.log(profile._json.email)
-      const user = await Users.create({
-        email: profile._json.email,
-        avatarUrl,
-        oauth: {
-          // เราควรยืนยันผ่าน id เสมอ
-          facebook: profile._json.id
+      try {
+        const avatarUrlFromFacebook = profile?._json?.picture?.data?.url
+        const id = profile?._json?.id
+        let avatarUrl
+        // console.log(profile._json)
+        // console.log('profile id ', profile._json.id, profile.id)
+        if (!id) {
+          return next(null, false, 'พบปัญหาในการเข้าสู่ระบบผ่าน Facebook')
         }
-      })
-      // next(null, false, 'ทดสอบ')
-      next(null, user)
+
+        const existsUser = await Users.findOne({
+          'oauth.facebook': profile?._json?.id
+        })
+        if (existsUser) {
+          return next(null, existsUser)
+        }
+        if (avatarUrlFromFacebook) {
+          avatarUrl = await uploadFileFromUrl(
+            `fb_${profile._json.id}.jpg`,
+            avatarUrlFromFacebook
+          )
+          // console.log(avatarUrl)
+        }
+        if (!profile?._json.email) {
+          return next(
+            null,
+            false,
+            'กรุณายินยอมให้เรารับข้อมูล Email ของคุณผ่านทาง Facebook'
+          )
+        }
+        // console.log(profile._json.email)
+        const user = await Users.create({
+          email: profile._json.email,
+          avatarUrl,
+          oauth: {
+            // เราควรยืนยันผ่าน id เสมอ
+            facebook: profile._json.id
+          }
+        })
+        // next(null, false, 'ทดสอบ')
+        next(null, user)
+      } catch (error) {
+        return next(error)
+      }
     }
   )
 )
