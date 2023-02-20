@@ -12,6 +12,10 @@ const schema = new Schema(
     oauth: {
       facebook: String,
       google: String
+    },
+    token: {
+      activate: String,
+      reset: String
     }
   },
   { timestamps: true }

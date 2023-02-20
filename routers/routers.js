@@ -26,6 +26,8 @@ router.get('/register', require('../controllers/getRegister'))
 router.post('/register', require('../controllers/postRegister'))
 router.get('/logout', require('../controllers/logout'))
 
+router.get('/activate/:token', require('../controllers/verifyActivateToken'))
+
 // ทำทดสอบ passport deserialize ให้ดู ข้อมูล req.user
 // router.get('/user', (req, res) => {
 //   res.send(req.user)
