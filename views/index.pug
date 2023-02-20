@@ -2,8 +2,23 @@ extends layouts/main
 
 block content
   include components/alert
-  h1 คุณกำลังเข้าสู่ระบบในนาม #{user.email}
   .card.mb-3
     .card-body
+      h1 คุณกำลังเข้าสู่ระบบในนาม #{user.email}
       img(src=user.avatarUrl)
+      ul
+        li #{user.password ? 'บัญชีนี้มีรหัสผ่าน' : 'บัญชีนี้ยังไม่มีรหัสผ่าน'}
+        li #{user.oauth.facebook ? 'บัญชีนี้ผูกบัญชีกับทาง Facebook แล้ว' : 'บัญชีนี้ยังไม่ได้ผูกบัญชีกับทาง Facebook'}
+        li #{user.oauth.google ? 'บัญชีนี้ผูกบัญชีกับทาง Google แล้ว' : 'บัญชีนี้ยังไม่ได้ผูกบัญชีกับทาง Google'}
+      if !user.password
+        .card.bg-secondary.mt-3
+          .card-body
+            h2.text-white เพิ่มรหัสผ่าน
+            form(action="/update-password" method="post")
+              input.form-control(type="password" name="password" placeholder="กรุณาระบุรหัสผ่าน")
+              button.mt-3.btn.btn-primary บันทึกรหัสผ่าน
+      if !user.oauth.facebook
+        a.d-block(href="/login/facebook") ผูกบัญชีกับ Facebook
+      if !user.oauth.google
+        a.d-block(href="/login/google") ผูกบัญชีกับ Google
   a.btn.btn-danger(href="/logout") ออกจากระบบ

@@ -48,7 +48,7 @@ passport.use(
 )
 
 const callbackOAuth =
-  (serviceName) => async (accessToken, refreshToken, profile, next) => {
+  (serviceName) => async (req, accessToken, refreshToken, profile, next) => {
     try {
       const id = profile?.id
       const email = profile?.emails?.[0]?.value
@@ -69,6 +69,14 @@ const callbackOAuth =
       const existsUser = await Users.findOne({
         [`oauth.${serviceName}`]: id
       })
+      if (req.user) {
+        if (existsUser) {
+          return next(null, false, 'บัญชีนี้ได้ผูกกับบัญชีอื่นไปแล้ว')
+        }
+        req.user.oauth[serviceName] = id
+        await req.user.save()
+        return next(null, req.user)
+      }
       if (existsUser) {
         return next(null, existsUser)
       }
@@ -109,7 +117,8 @@ passport.use(
       clientID: process.env.FACEBOOK_CLIENT_ID,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
       callbackURL: process.env.FACEBOOK_CALLBACK_URL,
-      profileFields: ['displayName', 'email', 'picture.type(large)']
+      profileFields: ['displayName', 'email', 'picture.type(large)'],
+      passReqToCallback: true
     },
     callbackOAuth('facebook')
   )
@@ -122,7 +131,7 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
       scope: ['profile', 'email'],
-      state: true
+      passReqToCallback: true
     },
     callbackOAuth('google')
   )

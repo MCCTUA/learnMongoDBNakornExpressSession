@@ -7,6 +7,11 @@ const postLogin = require('../controllers/postLogin')
 const scopeFacebook = ['email']
 
 router.get('/', mustLoggedIn, require('../controllers/index'))
+router.post(
+  '/update-password',
+  mustLoggedIn,
+  require('../controllers/updatePassword')
+)
 router.get('/login', require('../controllers/getLogin'))
 router.post('/login', postLogin('local'))
 router.get(

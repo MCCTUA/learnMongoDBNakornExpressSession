@@ -10,7 +10,11 @@ module.exports = (strategyName) => (req, res, next) => {
     }
     if (!user) {
       req.flash('error', info)
-      return res.redirect('/login')
+      return res.redirect(req.user ? '/' : '/login')
+    }
+    if (req.user) {
+      req.flash('success', 'คุณได้ผูกบัญชีเสร็จสิ้น')
+      return res.redirect('/')
     }
     req.login(user, (err) => {
       if (err) {
