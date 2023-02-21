@@ -1,7 +1,7 @@
-const bcrypt = require('bcrypt')
-const crypto = require('crypto')
 const path = require('path')
 const Users = require('../models/Users')
+const generateToken = require('../utils/generateToken')
+const hashPassword = require('../utils/hashPassword')
 const sendMail = require('../utils/sendMail')
 
 module.exports = async (req, res) => {
@@ -19,16 +19,14 @@ module.exports = async (req, res) => {
     return redirectWithError('Email นี้เคยลงทะเบียนแล้ว')
   }
   try {
-    req.body.password = await bcrypt.hash(
-      req.body.password,
-      +process.env.SALT_ROUND
-    )
-    const activateToken = crypto.randomBytes(32).toString('hex')
+    req.body.password = await hashPassword(req.body.password)
+    const activateToken = generateToken()
     req.body.token = {
       activate: activateToken
     }
     await Users.create(req.body)
-    await sendMail({
+    // ขั้นตอนการส่ง mail (sendMail()) นี้ ไม่ต้อง await ให้ระบบส่ง email ไปได้เลย เนื่องจากเวลาอยู่ใน production หาก เรา await ขั้นตอนนี้ จะเสียเวลามาก และเกิดการรอ ทำให้ไม่ลงไปทำงาน req.flash (ด้านล่าง) ต่อ
+    sendMail({
       email: req.body.email,
       subject: 'ยืนยันตัวตนผ่านทางอีเมล',
       pug: {

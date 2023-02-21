@@ -4,6 +4,7 @@ const mustLoggedIn = require('../middlewares/mustLoggedIn')
 const router = Router()
 
 const postLogin = require('../controllers/postLogin')
+const checkResetToken = require('../middlewares/checkResetToken')
 const scopeFacebook = ['email']
 
 router.get('/', mustLoggedIn, require('../controllers/index'))
@@ -27,6 +28,15 @@ router.post('/register', require('../controllers/postRegister'))
 router.get('/logout', require('../controllers/logout'))
 
 router.get('/activate/:token', require('../controllers/verifyActivateToken'))
+
+router.get('/forget', require('../controllers/getForget'))
+router.post('/forget', require('../controllers/postForget'))
+router.get('/reset/:token', checkResetToken, require('../controllers/getReset'))
+router.post(
+  '/reset/:token',
+  checkResetToken,
+  require('../controllers/postReset')
+)
 
 // ทำทดสอบ passport deserialize ให้ดู ข้อมูล req.user
 // router.get('/user', (req, res) => {

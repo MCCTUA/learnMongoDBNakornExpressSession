@@ -1,0 +1,13 @@
+extends layouts/form
+
+block content
+  h1.h4 แก้ไขรหัสผ่านใหม่
+  include components/alert
+  form(action=`/reset/${token}` method="POST")
+    .mb-3
+      label.form-label(for="inputEmail") อีเมล:
+      input.form-control(id="inputEmail" type="email" name="email" value=user.email disabled)
+    .mb-3
+      label.form-label(for="inputPassword") รหัสผ่าน:
+      input.form-control(id="inputPassword" type="password" name="password" required)
+    button.btn.btn-secondary บันทึกรหัสผ่าน

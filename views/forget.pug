@@ -1,0 +1,12 @@
+extends layouts/form
+
+block content
+  include components/alert
+  form(action="/forget" method="POST")
+    .mb-3
+      label.form-label(for="inputEmail") อีเมล:
+      input.form-control(id="inputEmail" type="email" name="email" placeholder="กรุณาระบุที่อยู่อีเมลเพื่อขอรับรหัสผ่านใหม่" required)
+    ul
+      li
+        a(href="/login") เข้าสู่ระบบ
+    button.btn.btn-secondary ขอรับรหัสผ่าน
