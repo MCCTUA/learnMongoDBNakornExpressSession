@@ -17,6 +17,7 @@ module.exports = (strategyName) => (req, res, next) => {
       return res.redirect('/')
     }
     req.login(user, (err) => {
+      // ณ ตำแหน่งนี้จะไปเรียก serialize ใน passport ดังนั้น เราสามารถเอา sendMail() ไปดักไว้ใน serailize ได้ หรือ เพิ่ม extra message เช่น (user, (err) =>) เพิ่ม ({user, extraMessage: '....'}, (err)=>)
       if (err) {
         return next(err)
       }
